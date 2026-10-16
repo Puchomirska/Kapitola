@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Reading Journal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #fdfbfb;
+      --card-bg: #ffffff;
+      --primary: #9b6b77;
+      --primary-light: #f7ecee;
+      --accent: #d4a3a9;
+      --text-color: #3b3335;
+      --border-color: #e2d2d5;
+      --shadow: 0 8px 20px rgba(155, 107, 119, 0.08);
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Montserrat', sans-serif;
+      line-height: 1.6;
+      padding: 20px 10px;
+      background-image: radial-gradient(#e8d3d6 0.5px, transparent 0.5px);
+      background-size: 20px 20px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      border: 1px solid var(--border-color);
+      padding: 35px 20px;
+      background: var(--card-bg);
+      margin-bottom: 25px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    header p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    nav button {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border-radius: 20px;
+      color: var(--text-color);
+      transition: all 0.3s ease;
+    }
+
+    nav button:hover, nav button.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .tab-content.active { display: block; }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--primary);
+      margin: 20px 0 10px 0;
+    }
+
+    .form-group { margin-bottom: 15px; }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+      color: var(--primary);
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-color);
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .row { display: flex; gap: 15px; flex-wrap: wrap; }
+    .col { flex: 1; min-width: 200px; }
+
+    .btn-submit, .btn-reset {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn-reset {
+      background: #c58997;
+      margin-left: 10px;
+    }
+
+    .btn-submit:hover { background: #825460; }
+    .btn-reset:hover { background: #a86c7b; }
+
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .book-card {
+      border: 1px solid var(--border-color);
+      padding: 15px;
+      border-radius: 10px;
+      background: #fff;
+      position: relative;
+    }
+
+    .book-card img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.8);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      color: #b00;
+      font-weight: bold;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      background: var(--primary-light);
+      color: var(--primary);
+      margin-top: 5px;
+      margin-right: 5px;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    th { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      max-width: 640px;
+      margin: 15px auto;
+    }
+
+    .bingo-cell {
+      border: 1px solid var(--border-color);
+      padding: 12px 8px;
+      aspect-ratio: 1 / 1;
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: var(--bg-color);
+      border-radius: 10px;
+      user-select: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .bingo-cell:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .bingo-cell.checked {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      text-decoration: line-through;
+    }
+
+    .az-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .az-card {
+      border: 1px solid var(--border-color);
+      padding: 8px;
+      border-radius: 8px;
+      background: var(--bg-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .az-letter {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--primary);
+      min-width: 25px;
+      text-align: center;
+    }
+
+    .summary-card {
+      background: var(--primary-light);
+      border: 1px solid var(--border-color);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 20px;
+      justify-content: space-around;
+      text-align: center;
+    }
+
+    .summary-card h4 {
+      font-size: 1.5rem;
+      color: var(--primary);
+      font-family: 'Playfair Display', serif;
+    }
+
+    .tropes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .trope-item {
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: 500px;
+      max-width: 100%;
+      height: 500px;
+      margin: 20px auto;
+    }
+
+    .wheel-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .wheel-sector {
+      fill: #fcf8f6;
+      stroke: var(--border-color);
+      stroke-width: 1.5;
+      cursor: pointer;
+      transition: fill 0.2s ease;
+    }
+
+    .wheel-sector:hover { fill: var(--primary-light); }
+    .wheel-sector.active { fill: var(--primary); }
+
+    .wheel-label {
+      font-size: 8.5px;
+      font-weight: 600;
+      fill: var(--primary);
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .challenge-list input[type="text"] {
+      border: none;
+      border-bottom: 1px solid var(--border-color);
+      background: transparent;
+      border-radius: 0;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Book Reading Journal</h1>
+      <p>— Môj romantický knižný denník —</p>
+    </header>
+
+    <nav>
+      <button class="nav-btn active" onclick="openTab('review', this)">Book Review</button>
+      <button class="nav-btn" onclick="openTab('catalog', this)">Katalóg</button>
+      <button class="nav-btn" onclick="openTab('library', this)">Knižnica</button>
+      <button class="nav-btn" onclick="openTab('purchases', this)">Nákupy a rozpočet</button>
+      <button class="nav-btn" onclick="openTab('goals', this)">Predsavzatia</button>
+      <button class="nav-btn" onclick="openTab('checklist', this)">Book Checklist</button>
+      <button class="nav-btn" onclick="openTab('wishlist', this)">Wishlist</button>
+      <button class="nav-btn" onclick="openTab('read_books', this)">Prečítané knihy</button>
+      <button class="nav-btn" onclick="openTab('unfinished', this)">Nedokončené</button>
+      <button class="nav-btn" onclick="openTab('spice', this)">Spice Tracker</button>
+      <button class="nav-btn" onclick="openTab('series', this)">Series Review</button>
+      <button class="nav-btn" onclick="openTab('playlist', this)">Playlist</button>
+      <button class="nav-btn" onclick="openTab('adaptations', this)">Adaptácie</button>
+      <button class="nav-btn" onclick="openTab('quotes', this)">Citáty</button>
+      <button class="nav-btn" onclick="openTab('hangover', this)">Knižné opice</button>
+      <button class="nav-btn" onclick="openTab('worlds', this)">Knižné svety</button>
+      <button class="nav-btn" onclick="openTab('soul', this)">Odtlačok duše</button>
+      <button class="nav-btn" onclick="openTab('bingo', this)">BINGO</button>
+      <button class="nav-btn" onclick="openTab('az_challenge', this)">Výzva A-Z</button>
+      <button class="nav-btn" onclick="openTab('num_challenges', this)">Knižné Výzvy (#)</button>
+      <button class="nav-btn" onclick="openTab('boyfriends', this)">Book Boyfriend</button>
+    </nav>
+
+    <!-- BOOK REVIEW -->
+    <div id="review" class="tab-content active">
+      <h2>Pridať detailnú recenziu (Book Review)</h2>
+      <form id="reviewForm">
+        <div class="row">
+          <div class="col form-group"><label>Titul</label><input type="text" id="revTitle" required></div>
+          <div class="col form-group"><label>Autor</label><input type="text" id="revAuthor" required></div>
+          <div class="col form-group"><label>Jazyk</label><input type="text" id="revLang"></div>
+          <div class="col form-group"><label>Počet strán</label><input type="number" id="revPages"></div>
+        </div>
+        <div class="row">
+          <div class="col form-group"><label>Súčasťou série?</label>
+            <select id="revIsSeries"><option>Nie</option><option>Áno</option></select>
+          </div>
+          <div class="col form-group"><label>Dátum začatia</label><input type="date" id="revStart"></div>
+          <div class="col form-group"><label>Dátum dočítania</label><input type="date" id="revEnd"></div>
+          <div class="col form-group"><label>Obálka knihy</label><input type="file" id="revCover" accept="image/*"></div>
+        </div>
+        <div class="row">
+          <div class="col form-group"><label>Hodnotenie hviezdičkami</label>
+            <select id="revStars"><option>★★★★★</option><option>★★★★☆</option><option>★★★☆☆</option><option>★★☆☆☆</option><option>★☆☆☆☆</option></select>
+          </div>
+          <div class="col form-group"><label>Hodnotenie pikantnosti (Spice 🔥)</label>
+            <select id="revSpice"><option>🔥🔥🔥🔥🔥</option><option>🔥🔥🔥🔥</option><option>🔥🔥🔥</option><option>🔥🔥</option><option>🔥</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Kniha v 1 vete</label><input type="text" id="revSentence"></div>
+        <div class="form-group"><label>Bez týchto postáv to nie je ono</label><input type="text" id="revChars"></div>
+        <div class="form-group"><label>Stručné zhrnutie</label><textarea id="revSummary"></textarea></div>
+        <div class="form-group"><label>Tieto strany ma oslovili</label><input type="text" id="revPagesNote" placeholder="napr. 112, 204-210"></div>
+        <div class="form-group"><label>Obľúbená myšlienka</label><textarea id="revQuote"></textarea></div>
+        <button type="submit" class="btn-submit">Uložiť Recenziu do katalógu</button>
+      </form>
+    </div>
+
+    <!-- KATALÓG -->
+    <div id="catalog" class="tab-content">
+      <h2>Katalóg prečítaných kníh</h2>
+      <div id="bookGrid" class="book-grid"></div>
+    </div>
+
+    <!-- KNIŽNICA -->
+    <div id="library" class="tab-content">
+      <h2>Knižnica (Vlastnené knihy)</h2>
+      <form id="libraryForm" class="row" style="margin-bottom: 20px;">
+        <div class="col form-group"><label>Titul</label><input type="text" id="libTitle" required></div>
+        <div class="col form-group"><label>Autor</label><input type="text" id="libAuthor" required></div>
+        <div class="col form-group"><label>Prečítaná?</label><select id="libRead"><option>Nie</option><option>Áno</option></select></div>
+        <div class="col form-group"><label>Kedy prečítaná</label><input type="date" id="libDate"></div>
+        <div class="col form-group"><label>Hodnotenie srdiečkami</label>
+          <select id="libHearts"><option>-</option><option>❤️❤️❤️❤️❤️</option><option>❤️❤️❤️❤️</option><option>❤️❤️❤️</option><option>❤️❤️</option><option>❤️</option></select>
+        </div>
+        <div class="col form-group" style="align-self: flex-end;"><button class="btn-submit" style="margin-top:0;">Pridať</button></div>
+      </form>
+      <table>
+        <thead><tr><th>Titul</th><th>Autor</th><th>Prečítaná</th><th>Dátum</th><th>Hodnotenie</th></tr></thead>
+        <tbody id="libraryTable"></tbody>
+      </table>
+    </div>
+
+    <!-- NÁKUPY A ROZPOČET -->
+    <div id="purchases" class="tab-content">
+      <h2>Nákupy a rozpočet</h2>
+      <div class="summary-card">
+        <div><span style="font-size:0.8rem; text-transform:uppercase;">Kúpené knihy</span><h4 id="statCount">0 ks</h4></div>
+        <div><span style="font-size:0.8rem; text-transform:uppercase;">Celková suma</span><h4 id="statTotal">0.00 €</h4></div>
+        <div><span style="font-size:0.8rem; text-transform:uppercase;">Limitky / Oriezky</span><h4 id="statSpecial">0 ks</h4></div>
+      </div>
+      <form id="purchaseForm" class="row" style="margin-bottom: 20px;">
+        <div class="col form-group"><label>Titul</label><input type="text" id="pTitle" required></div>
+        <div class="col form-group"><label>Autor</label><input type="text" id="pAuthor"></div>
+        <div class="col form-group"><label>Cena (€)</label><input type="number" step="0.01" id="pPrice" required></div>
+        <div class="col form-group"><label>Limitka/Oriezka?</label><select id="pSpecial"><option>Nie</option><option>Áno</option></select></div>
+        <div class="col form-group"><label>Dátum kúpenia</label><input type="date" id="pDate"></div>
+        <div class="col form-group"><label>Prečítaná?</label><select id="pRead"><option>Nie</option><option>Áno</option></select></div>
+        <div class="col form-group" style="align-self: flex-end;"><button class="btn-submit" style="margin-top:0;">Pridať</button></div>
+      </form>
+      <table>
+        <thead><tr><th>Titul</th><th>Autor</th><th>Cena</th><th>Limitka/Oriezka</th><th>Dátum</th><th>Prečítaná</th></tr></thead>
+        <tbody id="purchaseTable"></tbody>
+      </table>
+    </div>
+
+    <!-- PREDSAVZATIA -->
+    <div id="goals" class="tab-content">
+      <h2>Čitateľské predsavzatia</h2>
+      <div class="row">
+        <div class="col form-group"><label>Kniha, ktorej sa najviac bojím</label><input type="text" class="goal-input" data-goal="g0"></div>
+        <div class="col form-group"><label>Najočakávanejšia novinka roka</label><input type="text" class="goal-input" data-goal="g1"></div>
+      </div>
+      <div class="row">
+        <div class="col form-group"><label>Audiokniha, ktorú si vypočujem</label><input type="text" class="goal-input" data-goal="g2"></div>
+        <div class="col form-group"><label>Nový autor</label><input type="text" class="goal-input" data-goal="g3"></div>
+      </div>
+      <div class="row">
+        <div class="col form-group"><label>Počet kníh, ktoré tento rok prečítam</label><input type="number" class="goal-input" data-goal="g4"></div>
+        <div class="col form-group"><label>Autor, ktorému dám druhú šancu</label><input type="text" class="goal-input" data-goal="g5"></div>
+      </div>
+      <div class="row">
+        <div class="col form-group"><label>Kniha, na ktorú sa tento rok najviac teším</label><input type="text" class="goal-input" data-goal="g6"></div>
+        <div class="col form-group"><label>Kniha, ktorá bude najväčšou výzvou</label><input type="text" class="goal-input" data-goal="g7"></div>
+      </div>
+      <button class="btn-reset" onclick="resetSection('goals')">Resetovať predsavzatia</button>
+    </div>
+
+    <!-- BOOK CHECKLIST -->
+    <div id="checklist" class="tab-content">
+      <h2>Book Checklist</h2>
+      <div class="row">
+        <div class="col">
+          <h3>Dark Romance</h3>
+          <div id="darkRomanceList"></div>
+        </div>
+        <div class="col">
+          <h3>Romantasy</h3>
+          <div id="romantasyList"></div>
+        </div>
+      </div>
+      <button class="btn-reset" style="margin-top:20px;" onclick="resetSection('checklist')">Resetovať Checklist</button>
+    </div>
+
+    <!-- WISHLIST -->
+    <div id="wishlist" class="tab-content">
+      <h2>Knižný Wishlist</h2>
+      <form id="wishlistForm" class="row" style="margin-bottom:20px;">
+        <div class="col form-group"><label>Titul</label><input type="text" id="wTitle" required></div>
+        <div class="col form-group"><label>Autor</label><input type="text" id="wAuthor"></div>
+        <div class="col form-group"><label>Cena (€)</label><input type="number" step="0.01" id="wPrice"></div>
+        <div class="col form-group"><label>Prečítaná?</label><select id="wRead"><option>Nie</option><option>Áno (✔)</option></select></div>
+        <div class="col form-group" style="align-self: flex-end;"><button class="btn-submit" style="margin-top:0;">Pridať</button></div>
+      </form>
+      <table>
+        <thead><tr><th>Titul</th><th>Autor</th><th>Cena</th><th>Prečítaná</th></tr></thead>
+        <tbody id="wishlistTable"></tbody>
+      </table>
+    </div>
+
+    <!-- PREČÍTANÉ KNIHY -->
+    <div id="read_books" class="tab-content">
+      <h2>Prečítané knihy (Zoznam)</h2>
+      <form id="readBooksForm" class="row" style="margin-bottom:20px;">
+        <div class="col form-group"><label>Titul</label><input type="text" id="rbTitle" required></div>
+        <div class="col form-group"><label>Autor</label><input type="text" id="rbAuthor" required></div>
+        <div class="col form-group"><label>Začiatok čítania</label><input type="date" id="rbStart"></div>
+        <div class="col form-group"><label>Koniec čítania</label><input type="date" id="rbEnd"></div>
+        <div class="col form-group"><label>Hodnotenie</label>
+          <select id="rbHearts"><option>❤️❤️❤️❤️❤️</option><option>❤️❤️❤️❤️</option><option>❤️❤️❤️</option><option>❤️❤️</option><option>❤️</option></select>
+        </div>
+        <div class="col form-group" style="align-self: flex-end;"><button class="btn-submit" style="margin-top:0;">Uložiť</button></div>
+      </form>
+      <table>
+        <thead><tr><th>Titul</th><th>Autor</th><th>Začiatok</th><th>Koniec</th><th>Hodnotenie</th></tr></thead>
+        <tbody id="readBooksTable"></tbody>
+      </table>
+    </div>
+
+    <!-- NEDOKONČENÉ -->
+    <div id="unfinished" class="tab-content">
+      <h2>Nedokončené knihy</h2>
+      <form id="unfinishedForm" class="row" style="margin-bottom:20px;">
+        <div class="col form-group"><label>Titul</label><input type="text" id="uTitle" required></div>
+        <div class="col form-group"><label>Autor</label><input type="text" id="uAuthor"></div>
+        <div class="col form-group"><label>Dátum odloženia</label><input type="date" id="uDate"></div>
+        <div class="col form-group"><label>Odložené na strane</label><input type="text" id="uPage"></div>
+        <div class="col form-group"><label>Dôvod</label><input type="text" id="uReason"></div>
+        <div class="col form-group" style="align-self: flex-end;"><button class="btn-submit" style="margin-top:0;">Pridať</button></div>
+      </form>
+      <table>
+        <thead><tr><th>Titul</th><th>Autor</th><th>Dátum</th><th>Strana</th><th>Dôvod</th></tr></thead>
+        <tbody id="unfinishedTable"></tbody>
+      </table>
+    </div>
+
+    <!-- SPICE TRACKER -->
+    <div id="spice" class="tab-content">
+      <h2>Spice Tracker</h2>
+      <h3>Stupnica pikantnosti</h3>
+      <div style="background: var(--primary-light); padding: 15px; border-radius: 8px; font-size:0.85rem; margin-bottom: 20px;">
+        <p>🔥 <strong>1 ohník:</strong> Mierna vášeň, letmé bozky, jemný flirt.</p>
+        <p>🔥🔥 <strong>2 ohníky:</strong> Slow burn, rastúce napätie, jemné romantické scény.</p>
+        <p>🔥🔥🔥 <strong>3 ohníky:</strong> Horúca chémia, detailnejšie opísaná vášeň.</p>
+        <p>🔥🔥🔥🔥 <strong>4 ohníky:</strong> Intenzívne a časté pikantné scény.</p>
+        <p>🔥🔥🔥🔥🔥 <strong>5 ohníkov:</strong> Extrémne 🔥 (Explicitná dark romance / vysoká intenzita).</p>
+      </div>
+
+      <h3>TOP 5 Romance</h3>
+      <table>
+        <thead><tr><th>#</th><th>Titul</th><th>Kľúčový motív</th><th>Spice level</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><input type="text"></td><td><input type="text"></td><td><input type="text" placeholder="🔥🔥🔥🔥🔥"></td></tr>
+          <tr><td>2</td><td><input type="text"></td><td><input type="text"></td><td><input type="text" placeholder="🔥🔥🔥🔥"></td></tr>
+          <tr><td>3</td><td><input type="text"></td><td><input type="text"></td><td><input type="text" placeholder="🔥🔥🔥"></td></tr>
+          <tr><td>4</td><td><input type="text"></td><td><input type="text"></td><td><input type="text" placeholder="🔥🔥"></td></tr>
+          <tr><td>5</td><td><input type="text"></td><td><input type="text"></td><td><input type="text" placeholder="🔥"></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Romantické motívy (Trópy)</h3>
+      <div class="tropes-grid">
+        <label class="trope-item"><input type="checkbox"> enemies to lovers</label>
+        <label class="trope-item"><input type="checkbox"> len jedna posteľ</label>
+        <label class="trope-item"><input type="checkbox"> osudová láska</label>
+        <label class="trope-item"><input type="checkbox"> “Kto ti to urobil?”</label>
+        <label class="trope-item"><input type="checkbox"> skrytá identita</label>
+        <label class="trope-item"><input type="checkbox"> “Dotkni sa jej a umrieš”</label>
+        <label class="trope-item"><input type="checkbox"> nútená blízkosť</label>
+        <label class="trope-item"><input type="checkbox"> morálne sivý hrdina</label>
+        <label class="trope-item"><input type="checkbox"> rivals to lovers</label>
+        <label class="trope-item"><input type="checkbox"> bodyguard x princess</label>
+        <label class="trope-item"><input type="checkbox"> falošné manželstvo</label>
+        <label class="trope-item"><input type="checkbox"> mrzút x slniečko</label>
+        <label class="trope-item"><input type="checkbox"> tajný dedič trónu</label>
+        <label class="trope-item"><input type="checkbox"> dohodnuté manželstvo</label>
+        <label class="trope-item"><input type="checkbox"> záporák získa dievča</label>
+        <label class="trope-item"><input type="checkbox"> falošný vzťah (fake dating)</label>
+      </div>
+    </div>
+
+    <!-- SERIES REVIEW -->
+    <div id="series" class="tab-content">
+      <h2>Series Book Review</h2>
+      <form id="seriesForm" style="margin-bottom: 20px;">
+        <div class="row">
+          <div class="col form-group"><label>Názov série</label><input type="text" id="sName" required></div>
+          <div class="col form-group"><label>Autor</label><input type="text" id="sAuthor"></div>
+          <div class="col form-group"><label>Počet častí</label><input type="number" id="sParts"></div>
+        </div>
+        <div class="row">
+          <div class="col form-group"><label>Jazyk</label><input type="text" id="sLang"></div>
+          <div class="col form-group"><label>Žáner</label><input type="text" id="sGenre"></div>
+          <div class="col form-group"><label>Dátum začatia</label><input type="date" id="sStart"></div>
+          <div class="col form-group"><label>Dátum dočítania</label><input type="date" id="sEnd"></div>
+        </div>
+        <div class="row">
+          <div class="col form-group"><label>Hodnotenie hviezdičkami</label>
+            <select id="sStars"><option>★★★★★</option><option>★★★★☆</option><option>★★★☆☆</option><option>★★☆☆☆</option><option>★☆☆☆☆</option></select>
+          </div>
+          <div class="col form-group"><label>Hodnotenie pikantnosti (Spice 🔥)</label>
+            <select id="sSpice"><option>🔥🔥🔥🔥🔥</option><option>🔥🔥🔥🔥</option><option>🔥🔥🔥</option><option>🔥🔥</option><option>🔥</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Séria v jednej vete</label><input type="text" id="sSentence"></div>
+        <div class="form-group"><label>Hodnotenie série</label><textarea id="sReview"></textarea></div>
+        <div class="form-group"><label>Obľúbená myšlienka</label><textarea id="sQuote"></textarea></div>
+        <button type="submit" class="btn-submit">Uložiť Sériu</button>
+      </form>
+      <div id="seriesContainer"></div>
+    </div>
+
+    <!-- PLAYLIST -->
+    <div id="playlist" class="tab-content">
+      <h2>Knižný Playlist</h2>
+      <form id="playlistForm" class="row" style="margin-bottom:20px;">
+        <div class="col form-group"><label>Titul</label><input type="text" id="plTitle" required></div>
+        <div class="col form-group"><label>Skladba</label><input type="text" id="plSong" required></div>
+        <div class="col form-group"><label>Interpret</label><input type="text" id="plArtist"></div>
+        <div class="col form-group"><label>Spotify kód / Link</label><input type="text" id="plSpotify"></div>
+        <div class="col form-group" style="align-self: flex-end;"><button class="btn-submit" style="margin-top:0;">Pridať skladbu</button></div>
+      </form>
+      <table>
+        <thead><tr><th>Titul</th><th>Skladba</th><th>Interpret</th><th>Spotify Kód</th></tr></thead>
+        <tbody id="playlistTable"></tbody>
+      </table>
+    </div>
+
+    <!-- ADAPTÁCIE -->
+    <div id="adaptations" class="tab-content">
+      <h2>Adaptácie (Kniha vs. Film/Seriál)</h2>
+      <form id="adaptationForm" style="margin-bottom:20px;">
+        <div class="row">
+          <div class="col form-group"><label>Názov knihy</label><input type="text" id="adBook" required></div>
+          <div class="col form-group"><label>Hodnotenie knihy</label>
+            <select id="adBookStars"><option>★★★★★</option><option>★★★★☆</option><option>★★★☆☆</option><option>★★☆☆☆</option><option>★☆☆☆☆</option></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col form-group"><label>Názov seriálu/filmu</label><input type="text" id="adMovie" required></div>
+          <div class="col form-group"><label>Hodnotenie filmu/seriálu</label>
+            <select id="adMovieStars"><option>★★★★★</option><option>★★★★☆</option><option>★★★☆☆</option><option>★★☆☆☆</option><option>★☆☆☆☆</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Čo výrazne zmenili?</label><textarea id="adChanges"></textarea></div>
+        <div class="form-group"><label>Čo bolo lepšie?</label>
+          <select id="adWinner"><option>Kniha</option><option>Film / Seriál</option><option>Rovnako dobré</option></select>
+        </div>
+        <button type="submit" class="btn-submit">Uložiť záznam</button>
+      </form>
+      <div id="adaptationsList"></div>
+    </div>
+
+    <!-- CITÁTY -->
+    <div id="quotes" class="tab-content">
+      <h2>Sieň slávy citátov</h2>
+      <form id="quoteForm" style="margin-bottom:20px;">
+        <div class="form-group"><label>Citát</label><textarea id="qText" required></textarea></div>
+        <div class="row">
+          <div class="col form-group"><label>Kniha</label><input type="text" id="qBook"></div>
+          <div class="col form-group"><label>Postava</label><input type="text" id="qChar"></div>
+          <div class="col form-group"><label>Strana</label><input type="text" id="qPage"></div>
+        </div>
+        <button type="submit" class="btn-submit">Uložiť Citát</button>
+      </form>
+      <div id="quotesContainer"></div>
+    </div>
+
+    <!-- KNIŽNÉ OPICE -->
+    <div id="hangover" class="tab-content">
+      <h2>Knižné opice (Book Hangover)</h2>
+      <form id="hangoverForm" style="margin-bottom:20px;">
+        <div class="row">
+          <div class="col form-group"><label>Titul</label><input type="text" id="hTitle" required></div>
+          <div class="col form-group"><label>Autor</label><input type="text" id="hAuthor"></div>
+          <div class="col form-group"><label>Čas na spamätanie sa (dni)</label><input type="number" id="hDays"></div>
+        </div>
+        <div class="form-group"><label>Pocity po dočítaní poslednej strany</label><textarea id="hFeelings"></textarea></div>
+        <button type="submit" class="btn-submit">Uložiť</button>
+      </form>
+      <div id="hangoverList"></div>
+    </div>
+
+    <!-- KNIŽNÉ SVETY -->
+    <div id="worlds" class="tab-content">
+      <h2>Moje knižné svety</h2>
+      <p style="font-size:0.85rem; text-align:center;">Klikaním vyfarbujte dieliky matice podľa prečítaných žánrov:</p>
+      <div class="wheel-container"><svg class="wheel-svg" viewBox="-160 -160 320 320" id="worldMatrix"></svg></div>
+      <div style="text-align: center;"><button class="btn-reset" onclick="resetSection('worlds')">Resetovať svety</button></div>
+    </div>
+
+    <!-- ODTLAČOK DUŠE -->
+    <div id="soul" class="tab-content">
+      <h2>Odtlačok duše</h2>
+      <p style="font-size:0.85rem; text-align:center;">Vyfarbujte dieliky matice podľa emócií, ktoré vo vás knihy zanechali:</p>
+      <div class="wheel-container"><svg class="wheel-svg" viewBox="-160 -160 320 320" id="soulMatrix"></svg></div>
+      <div style="text-align: center;"><button class="btn-reset" onclick="resetSection('soul')">Resetovať odtlačok</button></div>
+    </div>
+
+    <!-- BINGO -->
+    <div id="bingo" class="tab-content">
+      <h2>Knižné BINGO</h2>
+      <p style="font-size: 0.85rem; margin-bottom:15px; text-align:center;">Kliknutím označte splnené políčko a poskladajte riadok, stĺpec alebo uhlopriečku (4×4):</p>
+      
+      <h3 style="text-align:center;">Bingo #1</h3>
+      <div class="bingo-grid" id="bingoContainer1"></div>
+      <div style="text-align:center; margin-bottom: 25px;"><button class="btn-reset" onclick="resetSection('bingo1')">Nové Bingo 1</button></div>
+
+      <h3 style="text-align:center;">Bingo #2</h3>
+      <div class="bingo-grid" id="bingoContainer2"></div>
+      <div style="text-align:center;"><button class="btn-reset" onclick="resetSection('bingo2')">Nové Bingo 2</button></div>
+    </div>
+
+    <!-- VÝZVA A-Z -->
+    <div id="az_challenge" class="tab-content">
+      <h2>Knižná výzva od A po Z</h2>
+      <div class="az-grid" id="azGrid"></div>
+      <div style="text-align:center; margin-top: 20px;"><button class="btn-reset" onclick="resetSection('az')">Resetovať výzvu A-Z</button></div>
+    </div>
+
+    <!-- KNIŽNÉ VÝZVY (#) -->
+    <div id="num_challenges" class="tab-content">
+      <h2>Čitateľské výzvy (Počet kníh)</h2>
+      <div class="row">
+        <div class="col challenge-list">
+          <h3>10 Books Challenge</h3>
+          <div id="c10"></div>
+        </div>
+        <div class="col challenge-list">
+          <h3>20 Books Challenge</h3>
+          <div id="c20"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:20px;">
+        <div class="col challenge-list">
+          <h3>50 Books Challenge</h3>
+          <div id="c50"></div>
+        </div>
+        <div class="col challenge-list">
+          <h3>100 Books Challenge</h3>
+          <div id="c100"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:20px;">
+        <div class="col challenge-list">
+          <h3>200 Books Challenge</h3>
+          <div id="c200"></div>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top:25px;"><button class="btn-reset" onclick="resetSection('num')">Resetovať číselné výzvy</button></div>
+    </div>
+
+    <!-- BOOK BOYFRIEND -->
+    <div id="boyfriends" class="tab-content">
+      <h2>Book Boyfriend</h2>
+      <form id="bfForm" style="margin-bottom:20px;">
+        <div class="row">
+          <div class="col form-group"><label>Titul</label><input type="text" id="bfBook" required></div>
+          <div class="col form-group"><label>Autor</label><input type="text" id="bfAuthor"></div>
+          <div class="col form-group"><label>Vek</label><input type="text" id="bfAge"></div>
+        </div>
+        <div class="form-group"><label>Opis jednou vetou</label><input type="text" id="bfDesc"></div>
+        <div class="row">
+          <div class="col form-group"><label>Vlastnosti</label><input type="text" id="bfTraits"></div>
+          <div class="col form-group"><label>Vzhľad</label><input type="text" id="bfLook"></div>
+        </div>
+        <div class="form-group"><label>Ikonický citát</label><textarea id="bfQuote"></textarea></div>
+        <button type="submit" class="btn-submit">Uložiť postavu</button>
+      </form>
+      <div id="bfList"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // PREKLIKÁVANIE
+    function openTab(tabName, btnElement) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      
+      const selectedTab = document.getElementById(tabName);
+      if (selectedTab) selectedTab.classList.add('active');
+      if (btnElement) btnElement.classList.add('active');
+    }
+
+    // LOCAL STORAGE DÁTA
+    let reviews = JSON.parse(localStorage.getItem('myReviews')) || [];
+    let library = JSON.parse(localStorage.getItem('myLibrary')) || [];
+    let purchases = JSON.parse(localStorage.getItem('myPurchases')) || [];
+    let wishlist = JSON.parse(localStorage.getItem('myWishlist')) || [];
+    let readBooks = JSON.parse(localStorage.getItem('myReadBooks')) || [];
+    let unfinished = JSON.parse(localStorage.getItem('myUnfinished')) || [];
+    let series = JSON.parse(localStorage.getItem('mySeries')) || [];
+    let playlist = JSON.parse(localStorage.getItem('myPlaylist')) || [];
+    let adaptations = JSON.parse(localStorage.getItem('myAdaptations')) || [];
+    let quotes = JSON.parse(localStorage.getItem('myQuotes')) || [];
+    let hangovers = JSON.parse(localStorage.getItem('myHangovers')) || [];
+    let boyfriends = JSON.parse(localStorage.getItem('myBoyfriends')) || [];
+
+    // FUNKCIA NA RESETOVANIE SEKCÍ / VYTVORENIE NOVÉHO BINGA A VÝZIEV
+    function resetSection(type) {
+      if(!confirm("Naozaj chcete vymazať a začať odznova túto sekciu?")) return;
+      
+      if(type === 'bingo1') {
+        localStorage.removeItem('myBingoData1');
+        renderBingo();
+      } else if(type === 'bingo2') {
+        localStorage.removeItem('myBingoData2');
+        renderBingo();
+      } else if(type === 'az') {
+        localStorage.removeItem('myAZData');
+        renderAZ();
+      } else if(type === 'num') {
+        ['c10', 'c20', 'c50', 'c100', 'c200'].forEach(id => localStorage.removeItem('myNum_' + id));
+        renderNumChallenges();
+      } else if(type === 'checklist') {
+        localStorage.removeItem('myChecklistData');
+        renderChecklist();
+      } else if(type === 'goals') {
+        localStorage.removeItem('myGoalsData');
+        document.querySelectorAll('.goal-input').forEach(input => input.value = '');
+      } else if(type === 'worlds') {
+        localStorage.removeItem('myWorldMatrixData');
+        createWheelMatrix('worldMatrix', worldCategories, 'myWorldMatrixData');
+      } else if(type === 'soul') {
+        localStorage.removeItem('mySoulMatrixData');
+        createWheelMatrix('soulMatrix', soulCategories, 'mySoulMatrixData');
+      }
+      alert('Sekcia bola úspešne resetovaná na čistý štart!');
+    }
+
+    // BOOK REVIEW & KATALÓG
+    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const fileInput = document.getElementById('revCover');
+      
+      const saveData = (imgUrl) => {
+        try {
+          reviews.push({
+            id: Date.now(),
+            title: document.getElementById('revTitle').value,
+            author: document.getElementById('revAuthor').value,
+            lang: document.getElementById('revLang').value,
+            pages: document.getElementById('revPages').value,
+            isSeries: document.getElementById('revIsSeries').value,
+            start: document.getElementById('revStart').value,
+            end: document.getElementById('revEnd').value,
+            stars: document.getElementById('revStars').value,
+            spice: document.getElementById('revSpice').value,
+            sentence: document.getElementById('revSentence').value,
+            chars: document.getElementById('revChars').value,
+            summary: document.getElementById('revSummary').value,
+            pagesNote: document.getElementById('revPagesNote').value,
+            quote: document.getElementById('revQuote').value,
+            image: imgUrl
+          });
+          localStorage.setItem('myReviews', JSON.stringify(reviews));
+          this.reset();
+          renderCatalog();
+          alert('Recenzia úspešne uložená do katalógu!');
+        } catch (err) {
+          alert('Chyba: Úložisko je plné (príliš veľká fotka). Skúste pridať recenziu bez obálki.');
+        }
+      };
+
+      if(fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const r = new FileReader();
+        r.onload = function(e) { saveData(e.target.result); };
+        r.onerror = function() { saveData('https://via.placeholder.com/200x280?text=Bez+Obalky'); };
+        r.readAsDataURL(file);
+      } else {
+        saveData('https://via.placeholder.com/200x280?text=Bez+Obalky');
+      }
+    });
+
+    function renderCatalog() {
+      const grid = document.getElementById('bookGrid');
+      grid.innerHTML = '';
+      reviews.forEach(b => {
+        grid.innerHTML += `
+          <div class="book-card">
+            <button class="delete-btn" onclick="deleteReview(${b.id})" title="Zmazať">×</button>
+            <img src="${b.image}">
+            <h3 style="font-family:'Playfair Display'; color:var(--primary);">${b.title}</h3>
+            <p style="font-size:0.85rem;"><strong>${b.author}</strong> (${b.lang || 'SK'})</p>
+            <div>
+              <span class="badge">${b.stars}</span>
+              <span class="badge">${b.spice}</span>
+            </div>
+            <p style="font-size:0.8rem; margin-top:8px; font-style:italic;">"${b.sentence}"</p>
+            <p style="font-size:0.8rem; margin-top:5px;">${b.summary}</p>
+          </div>
+        `;
+      });
+    }
+
+    function deleteReview(id) {
+      if(!confirm("Naozaj vymazať túto recenziu?")) return;
+      reviews = reviews.filter(b => b.id !== id);
+      localStorage.setItem('myReviews', JSON.stringify(reviews));
+      renderCatalog();
+    }
+
+    // PREDSAVZATIA S PAMÄŤOU
+    function initGoals() {
+      let savedGoals = JSON.parse(localStorage.getItem('myGoalsData')) || {};
+      document.querySelectorAll('.goal-input').forEach(input => {
+        let key = input.getAttribute('data-goal');
+        if(savedGoals[key]) input.value = savedGoals[key];
+        input.oninput = function() {
+          savedGoals[key] = this.value;
+          localStorage.setItem('myGoalsData', JSON.stringify(savedGoals));
+        };
+      });
+    }
+
+    // KNIŽNICA
+    document.getElementById('libraryForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      library.push({
+        title: document.getElementById('libTitle').value,
+        author: document.getElementById('libAuthor').value,
+        read: document.getElementById('libRead').value,
+        date: document.getElementById('libDate').value,
+        hearts: document.getElementById('libHearts').value
+      });
+      localStorage.setItem('myLibrary', JSON.stringify(library));
+      this.reset();
+      renderLibrary();
+    });
+
+    function renderLibrary() {
+      const tbody = document.getElementById('libraryTable');
+      tbody.innerHTML = '';
+      library.forEach(b => {
+        tbody.innerHTML += `<tr><td>${b.title}</td><td>${b.author}</td><td>${b.read}</td><td>${b.date || '-'}</td><td>${b.hearts}</td></tr>`;
+      });
+    }
+
+    // NÁKUPY A ROZPOČET
+    document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      purchases.push({
+        title: document.getElementById('pTitle').value,
+        author: document.getElementById('pAuthor').value,
+        price: parseFloat(document.getElementById('pPrice').value),
+        special: document.getElementById('pSpecial').value,
+        date: document.getElementById('pDate').value,
+        read: document.getElementById('pRead').value
+      });
+      localStorage.setItem('myPurchases', JSON.stringify(purchases));
+      this.reset();
+      renderPurchases();
+    });
+
+    function renderPurchases() {
+      const tbody = document.getElementById('purchaseTable');
+      tbody.innerHTML = '';
+      let total = 0, special = 0;
+      purchases.forEach(p => {
+        total += p.price;
+        if(p.special === 'Áno') special++;
+        tbody.innerHTML += `<tr><td>${p.title}</td><td>${p.author || '-'}</td><td>${p.price.toFixed(2)} €</td><td>${p.special}</td><td>${p.date || '-'}</td><td>${p.read}</td></tr>`;
+      });
+      document.getElementById('statCount').innerText = purchases.length + ' ks';
+      document.getElementById('statTotal').innerText = total.toFixed(2) + ' €';
+      document.getElementById('statSpecial').innerText = special + ' ks';
+    }
+
+    // BOOK CHECKLIST DATA
+    const darkRomanceBooks = ["Haunting Adeline", "Hunting Adeline", "Does It Hurt?", "Satan's Affair", "Twisted Love", "Twisted Games", "King of Wrath"];
+    const romantasyBooks = ["Dvory z tŕňov a ruží", "Mesto z popola", "Štvrté krídlo", "Železný plameň", "Kráľovstvo obávaných", "Holubica a had"];
+
+    function renderChecklist() {
+      const dContainer = document.getElementById('darkRomanceList');
+      const rContainer = document.getElementById('romantasyList');
+      let savedChecks = JSON.parse(localStorage.getItem('myChecklistData')) || {};
+
+      dContainer.innerHTML = darkRomanceBooks.map((b, i) => `
+        <label class="trope-item"><input type="checkbox" ${savedChecks['d_'+i] ? 'checked' : ''} onchange="saveCheck('d_${i}', this.checked)"> ${b}</label>
+      `).join('');
+
+      rContainer.innerHTML = romantasyBooks.map((b, i) => `
+        <label class="trope-item"><input type="checkbox" ${savedChecks['r_'+i] ? 'checked' : ''} onchange="saveCheck('r_${i}', this.checked)"> ${b}</label>
+      `).join('');
+    }
+
+    function saveCheck(id, val) {
+      let savedChecks = JSON.parse(localStorage.getItem('myChecklistData')) || {};
+      savedChecks[id] = val;
+      localStorage.setItem('myChecklistData', JSON.stringify(savedChecks));
+    }
+
+    // WISHLIST
+    document.getElementById('wishlistForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      wishlist.push({
+        title: document.getElementById('wTitle').value,
+        author: document.getElementById('wAuthor').value,
+        price: document.getElementById('wPrice').value,
+        read: document.getElementById('wRead').value
+      });
+      localStorage.setItem('myWishlist', JSON.stringify(wishlist));
+      this.reset();
+      renderWishlist();
+    });
+
+    function renderWishlist() {
+      const tbody = document.getElementById('wishlistTable');
+      tbody.innerHTML = '';
+      wishlist.forEach(w => {
+        tbody.innerHTML += `<tr><td>${w.title}</td><td>${w.author || '-'}</td><td>${w.price ? w.price + ' €' : '-'}</td><td>${w.read}</td></tr>`;
+      });
+    }
+
+    // PREČÍTANÉ KNIHY
+    document.getElementById('readBooksForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      readBooks.push({
+        title: document.getElementById('rbTitle').value,
+        author: document.getElementById('rbAuthor').value,
+        start: document.getElementById('rbStart').value,
+        end: document.getElementById('rbEnd').value,
+        hearts: document.getElementById('rbHearts').value
+      });
+      localStorage.setItem('myReadBooks', JSON.stringify(readBooks));
+      this.reset();
+      renderReadBooks();
+    });
+
+    function renderReadBooks() {
+      const tbody = document.getElementById('readBooksTable');
+      tbody.innerHTML = '';
+      readBooks.forEach(b => {
+        tbody.innerHTML += `<tr><td>${b.title}</td><td>${b.author}</td><td>${b.start || '-'}</td><td>${b.end || '-'}</td><td>${b.hearts}</td></tr>`;
+      });
+    }
+
+    // NEDOKONČENÉ
+    document.getElementById('unfinishedForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      unfinished.push({
+        title: document.getElementById('uTitle').value,
+        author: document.getElementById('uAuthor').value,
+        date: document.getElementById('uDate').value,
+        page: document.getElementById('uPage').value,
+        reason: document.getElementById('uReason').value
+      });
+      localStorage.setItem('myUnfinished', JSON.stringify(unfinished));
+      this.reset();
+      renderUnfinished();
+    });
+
+    function renderUnfinished() {
+      const tbody = document.getElementById('unfinishedTable');
+      tbody.innerHTML = '';
+      unfinished.forEach(u => {
+        tbody.innerHTML += `<tr><td>${u.title}</td><td>${u.author || '-'}</td><td>${u.date || '-'}</td><td>${u.page || '-'}</td><td>${u.reason || '-'}</td></tr>`;
+      });
+    }
+
+    // SERIES REVIEW
+    document.getElementById('seriesForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      series.push({
+        name: document.getElementById('sName').value,
+        author: document.getElementById('sAuthor').value,
+        parts: document.getElementById('sParts').value,
+        lang: document.getElementById('sLang').value,
+        genre: document.getElementById('sGenre').value,
+        start: document.getElementById('sStart').value,
+        end: document.getElementById('sEnd').value,
+        stars: document.getElementById('sStars').value,
+        spice: document.getElementById('sSpice').value,
+        sentence: document.getElementById('sSentence').value,
+        review: document.getElementById('sReview').value,
+        quote: document.getElementById('sQuote').value
+      });
+      localStorage.setItem('mySeries', JSON.stringify(series));
+      this.reset();
+      renderSeries();
+    });
+
+    function renderSeries() {
+      const c = document.getElementById('seriesContainer');
+      c.innerHTML = '';
+      series.forEach(s => {
+        c.innerHTML += `
+          <div style="border:1px solid var(--border-color); padding:15px; border-radius:8px; margin-bottom:10px; background:var(--bg-color);">
+            <h3>${s.name} <span style="font-size:0.9rem; color:#666;">(${s.author})</span></h3>
+            <p style="font-size:0.85rem;">Častí: ${s.parts || '-'} | Žáner: ${s.genre || '-'} | ${s.stars} | ${s.spice}</p>
+            <p style="font-size:0.8rem; italic; margin-top:5px;">"${s.sentence}"</p>
+            <p style="font-size:0.85rem; margin-top:5px;">${s.review}</p>
+          </div>
+        `;
+      });
+    }
+
+    // PLAYLIST
+    document.getElementById('playlistForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      playlist.push({
+        title: document.getElementById('plTitle').value,
+        song: document.getElementById('plSong').value,
+        artist: document.getElementById('plArtist').value,
+        spotify: document.getElementById('plSpotify').value
+      });
+      localStorage.setItem('myPlaylist', JSON.stringify(playlist));
+      this.reset();
+      renderPlaylist();
+    });
+
+    function renderPlaylist() {
+      const tbody = document.getElementById('playlistTable');
+      tbody.innerHTML = '';
+      playlist.forEach(p => {
+        tbody.innerHTML += `<tr><td>${p.title}</td><td>${p.song}</td><td>${p.artist || '-'}</td><td>${p.spotify || '-'}</td></tr>`;
+      });
+    }
+
+    // ADAPTÁCIE
+    document.getElementById('adaptationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      adaptations.push({
+        book: document.getElementById('adBook').value,
+        bookStars: document.getElementById('adBookStars').value,
+        movie: document.getElementById('adMovie').value,
+        movieStars: document.getElementById('adMovieStars').value,
+        changes: document.getElementById('adChanges').value,
+        winner: document.getElementById('adWinner').value
+      });
+      localStorage.setItem('myAdaptations', JSON.stringify(adaptations));
+      this.reset();
+      renderAdaptations();
+    });
+
+    function renderAdaptations() {
+      const l = document.getElementById('adaptationsList');
+      l.innerHTML = '';
+      adaptations.forEach(a => {
+        l.innerHTML += `
+          <div style="border:1px solid var(--border-color); padding:15px; border-radius:8px; margin-bottom:10px;">
+            <h3>Kniha: ${a.book} (${a.bookStars}) vs. Film: ${a.movie} (${a.movieStars})</h3>
+            <p style="font-size:0.85rem; margin-top:5px;"><strong>Zmeny:</strong> ${a.changes}</p>
+            <p style="font-size:0.85rem; color:var(--primary); font-weight:600; margin-top:3px;">Víťaz: ${a.winner}</p>
+          </div>
+        `;
+      });
+    }
+
+    // CITÁTY
+    document.getElementById('quoteForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      quotes.push({
+        text: document.getElementById('qText').value,
+        book: document.getElementById('qBook').value,
+        char: document.getElementById('qChar').value,
+        page: document.getElementById('qPage').value
+      });
+      localStorage.setItem('myQuotes', JSON.stringify(quotes));
+      this.reset();
+      renderQuotes();
+    });
+
+    function renderQuotes() {
+      const c = document.getElementById('quotesContainer');
+      c.innerHTML = '';
+      quotes.forEach(q => {
+        c.innerHTML += `
+          <div style="border-left:3px solid var(--accent); padding:10px 15px; background:var(--primary-light); margin-bottom:10px; border-radius:0 8px 8px 0;">
+            <p style="font-style:italic;">„${q.text}“</p>
+            <p style="font-size:0.8rem; text-align:right; color:var(--primary); font-weight:600; margin-top:5px;">
+              — ${q.char || 'Postava'}, str. ${q.page || '-'} (${q.book})
+            </p>
+          </div>
+        `;
+      });
+    }
+
+    // KNIŽNÉ OPICE
+    document.getElementById('hangoverForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      hangovers.push({
+        title: document.getElementById('hTitle').value,
+        author: document.getElementById('hAuthor').value,
+        days: document.getElementById('hDays').value,
+        feelings: document.getElementById('hFeelings').value
+      });
+      localStorage.setItem('myHangovers', JSON.stringify(hangovers));
+      this.reset();
+      renderHangovers();
+    });
+
+    function renderHangovers() {
+      const l = document.getElementById('hangoverList');
+      l.innerHTML = '';
+      hangovers.forEach(h => {
+        l.innerHTML += `
+          <div style="border:1px solid var(--border-color); padding:15px; border-radius:8px; margin-bottom:10px;">
+            <h3>${h.title} <span style="font-size:0.85rem; color:#666;">(${h.author})</span></h3>
+            <p style="font-size:0.85rem;"><strong>Čas na recovery:</strong> ${h.days || '?' } dní</p>
+            <p style="font-size:0.85rem; margin-top:5px;">${h.feelings}</p>
+          </div>
+        `;
+      });
+    }
+
+    // BINGO ITEMS (16 ITEMOV PRE 4x4 MRIEŽKU)
+    const bingoItems1 = [
+      "Grafická novela", "Znovu prečítaná kniha", "Fantasy kniha", "Červená obálka", 
+      "Špeciálna edícia", "Kniha s podpisom", "Videla som film a potom knihu", "Audiokniha", 
+      "Varovanie > 1 stranu", "Kniha o zvierati", "Prekliaty predmet", "Skrytá miestnosť", 
+      "Reč so zvieratami", "Svet podľa zváštnych pravidiel", "Záporák je žena", "Zimný dej"
+    ];
+
+    const bingoItems2 = [
+      "Postava stále je/pije", "Dôležitý list/denník", "Tajná správa", "Zlozvyk postavy", 
+      "Postava s tetovaním", "Siedmy diel série", "Meč na obálke", "Viac ako 500 strán", 
+      "Rozplakala ma", "Slovenský autor", "Ruža v príbehu", "Ružová obálka", 
+      "Playlist v knihe", "Stredná škola", "Domáci miláčik", "Cudzí jazyk"
+    ];
+
+    function renderBingo() {
+      const c1 = document.getElementById('bingoContainer1');
+      const c2 = document.getElementById('bingoContainer2');
+      
+      let savedBingo1 = JSON.parse(localStorage.getItem('myBingoData1')) || {};
+      let savedBingo2 = JSON.parse(localStorage.getItem('myBingoData2')) || {};
+
+      c1.innerHTML = bingoItems1.map((item, i) => `
+        <div class="bingo-cell ${savedBingo1[i] ? 'checked' : ''}" onclick="toggleBingo(1, ${i}, this)">${item}</div>
+      `).join('');
+
+      c2.innerHTML = bingoItems2.map((item, i) => `
+        <div class="bingo-cell ${savedBingo2[i] ? 'checked' : ''}" onclick="toggleBingo(2, ${i}, this)">${item}</div>
+      `).join('');
+    }
+
+    function toggleBingo(bingoNum, i, el) {
+      el.classList.toggle('checked');
+      const storageKey = 'myBingoData' + bingoNum;
+      let savedBingo = JSON.parse(localStorage.getItem(storageKey)) || {};
+      savedBingo[i] = el.classList.contains('checked');
+      localStorage.setItem(storageKey, JSON.stringify(savedBingo));
+    }
+
+    // A-Z CHALLENGE
+    function renderAZ() {
+      const grid = document.getElementById('azGrid');
+      const alphabet = "AÁBCČDĎEÉFGHIÍJKLM NŇOÓÔPQRŘSŠTŤUÚVWXYÝZŽ".replace(/ /g, '').split("");
+      let azData = JSON.parse(localStorage.getItem('myAZData')) || {};
+      grid.innerHTML = alphabet.map(l => `
+        <div class="az-card">
+          <div class="az-letter">${l}</div>
+          <input type="text" value="${azData[l] || ''}" placeholder="Kniha..." onchange="saveAZ('${l}', this.value)">
+        </div>
+      `).join('');
+    }
+
+    function saveAZ(l, val) {
+      let azData = JSON.parse(localStorage.getItem('myAZData')) || {};
+      azData[l] = val;
+      localStorage.setItem('myAZData', JSON.stringify(azData));
+    }
+
+    // NUMBER CHALLENGES (#)
+    function renderNumChallenges() {
+      const setupList = (containerId, count) => {
+        const c = document.getElementById(containerId);
+        let savedData = JSON.parse(localStorage.getItem('myNum_' + containerId)) || {};
+        let html = '';
+        for(let i = 1; i <= count; i++) {
+          html += `<div style="margin-bottom:5px; font-size:0.85rem;"><strong>${i}.</strong> <input type="text" value="${savedData[i] || ''}" placeholder="Titul knihy..." onchange="saveNumCh('${containerId}', ${i}, this.value)"></div>`;
+        }
+        c.innerHTML = html;
+      };
+      setupList('c10', 10);
+      setupList('c20', 20);
+      setupList('c50', 50);
+      setupList('c100', 100);
+      setupList('c200', 200);
+    }
+
+    function saveNumCh(cat, i, val) {
+      let savedData = JSON.parse(localStorage.getItem('myNum_' + cat)) || {};
+      savedData[i] = val;
+      localStorage.setItem('myNum_' + cat, JSON.stringify(savedData));
+    }
+
+    // BOOK BOYFRIEND
+    document.getElementById('bfForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      boyfriends.push({
+        book: document.getElementById('bfBook').value,
+        author: document.getElementById('bfAuthor').value,
+        age: document.getElementById('bfAge').value,
+        desc: document.getElementById('bfDesc').value,
+        traits: document.getElementById('bfTraits').value,
+        look: document.getElementById('bfLook').value,
+        quote: document.getElementById('bfQuote').value
+      });
+      localStorage.setItem('myBoyfriends', JSON.stringify(boyfriends));
+      this.reset();
+      renderBoyfriends();
+    });
+
+    function renderBoyfriends() {
+      const l = document.getElementById('bfList');
+      l.innerHTML = '';
+      boyfriends.forEach(b => {
+        l.innerHTML += `
+          <div style="border:1px solid var(--border-color); padding:15px; border-radius:8px; margin-bottom:10px;">
+            <h3>${b.book} <span style="font-size:0.85rem; color:var(--primary);">(${b.author}) — Vek: ${b.age || '?'}</span></h3>
+            <p style="font-size:0.85rem; italic">"${b.desc}"</p>
+            <p style="font-size:0.8rem; margin-top:5px;"><strong>Vlastnosti:</strong> ${b.traits} | <strong>Vzhľad:</strong> ${b.look}</p>
+            <p style="font-size:0.8rem; font-style:italic; margin-top:5px;">Citát: „${b.quote}“</p>
+          </div>
+        `;
+      });
+    }
+
+    // WHEEL MATRICES WITH LABELS & LOCAL STORAGE
+    const worldCategories = [
+      "Love stories", "Thrillere", "Fantasy", "Dark romance", 
+      "Osobný rozvoj", "Hist. romanca", "Young adult", "Romantasy"
+    ];
+
+    const soulCategories = [
+      "Hnev", "Radosť", "Plač", "Strach", 
+      "Vášeň", "Smútok", "Napätie", "Úžas"
+    ];
+
+    function createWheelMatrix(svgId, labels, storagePrefix) {
+      const svg = document.getElementById(svgId);
+      svg.innerHTML = ''; // Vyčistenie pre prípad resetu
+      const numSectors = 8, numRings = 8, innerR = 12, outerR = 100;
+      const ringWidth = (outerR - innerR) / numRings;
+
+      let savedData = JSON.parse(localStorage.getItem(storagePrefix)) || {};
+
+      for (let r = 0; r < numRings; r++) {
+        const r1 = innerR + r * ringWidth;
+        const r2 = r1 + ringWidth;
+        for (let s = 0; s < numSectors; s++) {
+          const a1 = (s * 360 / numSectors) * Math.PI / 180;
+          const a2 = ((s + 1) * 360 / numSectors) * Math.PI / 180;
+          const x1 = r1 * Math.cos(a1), y1 = r1 * Math.sin(a1);
+          const x2 = r2 * Math.cos(a1), y2 = r2 * Math.sin(a1);
+          const x3 = r2 * Math.cos(a2), y3 = r2 * Math.sin(a2);
+          const x4 = r1 * Math.cos(a2), y4 = r1 * Math.sin(a2);
+          const pathData = `M ${x1} ${y1} L ${x2} ${y2} A ${r2} ${r2} 0 0 1 ${x3} ${y3} L ${x4} ${y4} A ${r1} ${r1} 0 0 0 ${x1} ${y1} Z`;
+
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", pathData);
+
+          const cellKey = `${r}_${s}`;
+          if (savedData[cellKey]) {
+            path.setAttribute("class", "wheel-sector active");
+          } else {
+            path.setAttribute("class", "wheel-sector");
+          }
+
+          path.onclick = function() { 
+            this.classList.toggle("active");
+            savedData[cellKey] = this.classList.contains("active");
+            localStorage.setItem(storagePrefix, JSON.stringify(savedData));
+          };
+          svg.appendChild(path);
+        }
+      }
+
+      const labelRadius = 118;
+      for (let s = 0; s < numSectors; s++) {
+        const midAngleDeg = s * 45 + 22.5;
+        const midAngleRad = midAngleDeg * Math.PI / 180;
+
+        const x = labelRadius * Math.cos(midAngleRad);
+        const y = labelRadius * Math.sin(midAngleRad);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", x);
+        text.setAttribute("y", y);
+        text.setAttribute("class", "wheel-label");
+        text.textContent = labels[s];
+
+        svg.appendChild(text);
+      }
+    }
+
+    // INICIALIZÁCIA VŠETKÝCH PRVKOV
+    renderCatalog();
+    renderLibrary();
+    renderPurchases();
+    initGoals();
+    renderChecklist();
+    renderWishlist();
+    renderReadBooks();
+    renderUnfinished();
+    renderSeries();
+    renderPlaylist();
+    renderAdaptations();
+    renderQuotes();
+    renderHangovers();
+    renderBingo();
+    renderAZ();
+    renderNumChallenges();
+    renderBoyfriends();
+    createWheelMatrix('worldMatrix', worldCategories, 'myWorldMatrixData');
+    createWheelMatrix('soulMatrix', soulCategories, 'mySoulMatrixData');
+  </script>
+</body>
+</html>
